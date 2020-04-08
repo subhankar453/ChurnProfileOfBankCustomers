@@ -51,3 +51,30 @@ classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', weighted_me
 #Fitting the ANN to the training set
 classifier.fit(x_train, y_train, batch_size = 10, epochs = 100)
 
+#Part-3 Making the predictions and evaluating our model
+
+#Predicting the test set results
+y_pred = classifier.predict(x_test)
+y_pred = (y_pred > 0.5)
+
+#Predicting a single data results of whether the customer will leave or not
+"""
+Geography: France
+Credit Score: 600
+Gender: Male
+Age: 40 years old
+Tenure: 3 years
+Balance: $60000
+Number of Products: 2
+Does this customer have a credit card ? Yes
+Is this customer an Active Member: Yes
+Estimated Salary: $50000
+"""
+new_customer = sc.transform(np.array([[0, 0, 600, 1, 40, 3, 60000, 2, 1, 1, 50000]]))
+new_pred = classifier.predict(new_customer)
+new_pred = (new_pred > 0.5)
+
+#Making the confusion matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, y_pred)
+
