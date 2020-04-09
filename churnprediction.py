@@ -78,3 +78,66 @@ new_pred = (new_pred > 0.5)
 from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(y_test, y_pred)
 
+#Part-4 Evaluating, Improving and Tuning the ANN
+
+#Evaluating the ANN
+#Using the k-fold technique to reduce the accuracy and variation
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import cross_val_score
+from keras.models import Sequential
+from keras.layers import Dense
+def build_classifier():
+    classifier = Sequential()
+    classifier.add(Dense(activation="relu", input_dim=11, units=6, kernel_initializer="uniform"))
+    classifier.add(Dense(activation = "relu", units = 6, kernel_initializer = "uniform"))
+    classifier.add(Dense(activation = "sigmoid", units = 1, kernel_initializer = "uniform"))
+    classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+    return classifier
+classifier = KerasClassifier(build_fn = build_classifier, batch_size = 10, epochs = 100)
+accuracies = cross_val_score(estimator = classifier, X = x_train, y = y_train, cv = 10)
+mean = accuracies.mean()
+variance = accuracies.std()
+
+#Improving the ANN using Dropout to reduce the overfitting of the training data
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import cross_val_score
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dropout
+def build_classifier():
+    classifier = Sequential()
+    classifier.add(Dense(activation="relu", input_dim=11, units=6, kernel_initializer="uniform"))
+    classifier.add(Dropout(rate = 0.1))
+    classifier.add(Dense(activation = "relu", units = 6, kernel_initializer = "uniform"))
+    classifier.add(Dropout(rate = 0.1))
+    classifier.add(Dense(activation = "sigmoid", units = 1, kernel_initializer = "uniform"))
+    classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+    return classifier
+classifier = KerasClassifier(build_fn = build_classifier, batch_size = 10, epochs = 100)
+accuracies = cross_val_score(estimator = classifier, X = x_train, y = y_train, cv = 10)
+mean = accuracies.mean()
+variance = accuracies.std()
+
+#Tuning the ANN using Grid Search to optimise the hyperparameters in our ANN model
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import GridSearchCV
+from keras.models import Sequential
+from keras.layers import Dense
+def build_classifier(optimizer):
+    classifier = Sequential()
+    classifier.add(Dense(activation="relu", input_dim=11, units=6, kernel_initializer="uniform"))
+    classifier.add(Dense(activation = "relu", units = 6, kernel_initializer = "uniform"))
+    classifier.add(Dense(activation = "sigmoid", units = 1, kernel_initializer = "uniform"))
+    classifier.compile(optimizer = optimizer, loss = 'binary_crossentropy', metrics = ['accuracy'])
+    return classifier
+classifier = KerasClassifier(build_fn = build_classifier)
+parameters = {'batch_size' : [25, 40],
+              'epochs' : [100, 450],
+              'optimizer' : ['adam', 'rmsprop']}
+grid_search = GridSearchCV(estimator = classifier, 
+                           param_grid = parameters,
+                           scoring = 'accuracy',
+                           cv = 10)
+grid_search = grid_search.fit(x_train, y_train)
+best_parameters = grid_search.best_params_
+best_accuracy = grid_search.best_score_
